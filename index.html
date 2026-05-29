@@ -10,13 +10,15 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body class="bg-gray-50">
-    <div id="root"></div>
+    <div id="root" class="min-h-screen flex items-center justify-center text-gray-400">
+        Loading App...
+    </div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
 
         const formatCurrencyDisplay = (val) => {
-            if (!val) return '';
+            if (val === '' || val === null || val === undefined) return '';
             const parts = val.toString().split('.');
             let integerPart = parts[0];
             if (integerPart === '') integerPart = '0';
@@ -26,12 +28,27 @@
         };
 
         const parseCurrencyInput = (val) => {
-            let clean = val.replace(/\./g, ''); 
-            clean = clean.replace(/,/g, '.'); 
-            clean = clean.replace(/[^0-9.]/g, ''); 
-            const parts = clean.split('.');
-            if (parts.length > 2) clean = parts[0] + '.' + parts.slice(1).join('');
-            return clean;
+            if (val === '' || val === null || val === undefined) return '';
+            const lastComma = val.lastIndexOf(',');
+            const lastDot = val.lastIndexOf('.');
+            let decimalPos = -1;
+            
+            if (lastComma > lastDot) {
+                decimalPos = lastComma;
+            } else if (lastDot > lastComma) {
+                const charsAfter = val.length - 1 - lastDot;
+                if (charsAfter === 1 || charsAfter === 2 || charsAfter === 0) {
+                    decimalPos = lastDot;
+                }
+            }
+            
+            if (decimalPos !== -1) {
+                const integerPart = val.substring(0, decimalPos).replace(/[^0-9]/g, '');
+                const fractionalPart = val.substring(decimalPos + 1).replace(/[^0-9]/g, '');
+                return integerPart + '.' + fractionalPart;
+            } else {
+                return val.replace(/[^0-9]/g, '');
+            }
         };
 
         function App() {
@@ -41,9 +58,7 @@
             const [error, setError] = useState(false);
             const [lastUpdated, setLastUpdated] = useState('');
 
-            // Track which input the user used last so we don't overwrite it on refresh
             const [lastActive, setLastActive] = useState('eur');
-
             const [eur, setEur] = useState('');
             const [usd, setUsd] = useState('');
             const [idr, setIdr] = useState('');
@@ -99,32 +114,28 @@
                         }
                     } catch (e) { }
                     
-                    // Safely recalculate based on whichever box the user typed in last
                     updateInputsSafely(currentRates);
-
                 } catch (err) {
                     setError(true);
                     setRates(fallbackRates);
                     setPrevRates(null);
-                    
-                    // Safely recalculate based on whichever box the user typed in last
                     updateInputsSafely(fallbackRates);
                 } finally {
                     setTimeout(() => setLoading(false), 500);
                 }
             };
 
-            // New helper function to safely run the math on refresh without breaking decimals
             const updateInputsSafely = (ratesToUse) => {
-                if (lastActive === 'eur' && eur !== '') {
+                if (!ratesToUse) return;
+                if (lastActive === 'eur' && eur !== '' && eur !== '.') {
                     const num = parseFloat(eur);
                     setUsd((num * ratesToUse.eur.usd).toFixed(2));
                     setIdr(Math.round(num * ratesToUse.eur.idr).toString());
-                } else if (lastActive === 'usd' && usd !== '') {
+                } else if (lastActive === 'usd' && usd !== '' && usd !== '.') {
                     const num = parseFloat(usd);
                     setEur((num * ratesToUse.usd.eur).toFixed(2));
                     setIdr(Math.round(num * ratesToUse.usd.idr).toString());
-                } else if (lastActive === 'idr' && idr !== '') {
+                } else if (lastActive === 'idr' && idr !== '' && idr !== '.') {
                     const num = parseFloat(idr);
                     setEur((num * ratesToUse.idr.eur).toFixed(2));
                     setUsd((num * ratesToUse.idr.usd).toFixed(2));
@@ -231,4 +242,28 @@
                             </div>
 
                             <div className="relative">
-                                <label
+                                <label className="block text-sm font-semibold text-gray-600 mb-2 ml-1">Value in Dollar ($)</label>
+                                <div className="relative flex items-center">
+                                    <div className="absolute left-4 text-green-600 font-bold text-xl">$</div>
+                                    <input type="text" inputMode="decimal" value={formatCurrencyDisplay(usd)} onChange={handleUsdChange} disabled={loading && !rates} placeholder="0,00" className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-xl font-medium focus:ring-2 focus:ring-green-500 outline-none" />
+                                </div>
+                            </div>
+
+                            <div className="relative">
+                                <label className="block text-sm font-semibold text-gray-600 mb-2 ml-1">Value in IDR (Rp)</label>
+                                <div className="relative flex items-center">
+                                    <div className="absolute left-4 text-orange-600 font-bold text-lg">Rp</div>
+                                    <input type="text" inputMode="numeric" value={formatCurrencyDisplay(idr)} onChange={handleIdrChange} disabled={loading && !rates} placeholder="0" className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl text-xl font-medium focus:ring-2 focus:ring-orange-500 outline-none" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
