@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Live Currency Converter</title>
+    <title>Daily Currency Converter</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -185,7 +185,7 @@
                     <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
                         <div className="bg-blue-600 p-6 text-white text-center relative">
                             <h1 className="text-2xl font-bold mb-1">Currency Converter</h1>
-                            <p className="text-blue-100 text-sm">Live Direct-Source Syncing</p>
+                            <p className="text-blue-100 text-sm">By Sam</p>
                             <button onClick={fetchRates} disabled={loading} className="absolute top-6 right-6 p-2 rounded-full hover:bg-blue-700 transition-colors disabled:opacity-50 text-xl font-bold">
                                 {loading ? '...' : '↻'}
                             </button>
@@ -194,7 +194,7 @@
                         <div className="p-6 bg-blue-50/50 border-b border-gray-100">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-sm font-bold text-gray-600 uppercase tracking-wider flex items-center gap-2">
-                                    ⇆ Live Tick Rates
+                                    ⇆ Daily Exchange Rates
                                 </h2>
                                 <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full border border-gray-200">
                                     {loading ? 'Updating...' : (error ? 'Offline Mode' : `Updated: ${lastUpdated}`)}
